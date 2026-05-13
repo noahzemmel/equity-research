@@ -102,8 +102,8 @@ export async function runResearchPipeline(symbol: string) {
       finalView: r.finalView,
       confidence: r.confidence,
       sources: JSON.stringify(r.sources),
-      llmProvider: process.env.LLM_PROVIDER ?? "auto",
-      llmModel: process.env.LLM_MODEL ?? "default",
+      llmProvider: r.llmProvider,
+      llmModel: r.llmModel,
       raw: JSON.stringify(r),
     },
   });

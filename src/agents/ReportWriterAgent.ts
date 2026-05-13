@@ -31,7 +31,10 @@ const Input = z.object({
   sources: z.array(z.string()),
 });
 
-const Output = ResearchReportSchema;
+const Output = ResearchReportSchema.extend({
+  llmProvider: z.enum(["openai", "anthropic", "offline"]),
+  llmModel: z.string(),
+});
 
 export const ReportWriterAgent = defineAgent({
   name: "ReportWriterAgent",
@@ -112,6 +115,8 @@ Rules:
       input.newsSummary.toLowerCase().includes("no recent news") ||
       input.filingsSummary.toLowerCase().includes("no sec filings");
     if (weak && parsed.confidence > 0.4) parsed.confidence = 0.4;
+    parsed.llmProvider = res.provider;
+    parsed.llmModel = res.model;
     return parsed;
   },
 });
