@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body { background-color: #0b0d10; color: #e6e8eb; }
+body { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Inter, sans-serif; }
+
+.card { @apply bg-panel border border-edge rounded-xl p-4; }
+.card-title { @apply text-sm text-muted uppercase tracking-wide mb-2; }
+.btn { @apply inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-sm border border-edge bg-panel2 hover:bg-edge transition; }
+.btn-primary { @apply bg-accent text-bg border-accent hover:bg-accent/90; }
+.btn-danger { @apply bg-neg/20 text-neg border-neg/40 hover:bg-neg/30; }
+.input { @apply bg-panel2 border border-edge rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-accent; }
+.label { @apply text-xs text-muted uppercase tracking-wide; }
+.kbd { @apply text-[10px] bg-panel2 border border-edge rounded px-1 py-0.5 text-muted font-mono; }
+.tag { @apply inline-block text-xs px-2 py-0.5 rounded-full border border-edge bg-panel2 text-muted; }
+.divider { @apply border-t border-edge my-3; }
+
+table.data { @apply w-full text-sm; }
+table.data th { @apply text-left text-xs uppercase text-muted font-medium px-3 py-2 border-b border-edge; }
+table.data td { @apply px-3 py-2 border-b border-edge/60; }
+table.data tr:hover td { @apply bg-panel2; }
+
+.prose-report h3 { @apply text-sm uppercase tracking-wide text-muted mt-4 mb-1; }
+.prose-report p  { @apply text-sm leading-relaxed; }

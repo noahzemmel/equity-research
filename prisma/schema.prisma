@@ -1,0 +1,190 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Ticker {
+  symbol      String   @id
+  name        String?
+  sector      String?
+  industry    String?
+  exchange    String?
+  currency    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  watchlist   WatchlistItem?
+  reports     ResearchReport[]
+  positions   PaperPosition[]
+  trades      PaperTrade[]
+  ideas       TradeIdea[]
+  news        NewsItem[]
+  filings     Filing[]
+  quotes      QuoteSnapshot[]
+}
+
+model WatchlistItem {
+  id        String   @id @default(cuid())
+  symbol    String   @unique
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ticker    Ticker   @relation(fields: [symbol], references: [symbol], onDelete: Cascade)
+}
+
+model QuoteSnapshot {
+  id            String   @id @default(cuid())
+  symbol        String
+  price         Float
+  changePct     Float?
+  marketCap     Float?
+  currency      String?
+  asOf          DateTime
+  source        String   // "yahoo" | "manual" | "mock"
+  createdAt     DateTime @default(now())
+
+  ticker        Ticker   @relation(fields: [symbol], references: [symbol], onDelete: Cascade)
+  @@index([symbol, asOf])
+}
+
+model NewsItem {
+  id          String   @id @default(cuid())
+  symbol      String
+  title       String
+  url         String
+  source      String?
+  publishedAt DateTime?
+  summary     String?
+  createdAt   DateTime @default(now())
+
+  ticker      Ticker   @relation(fields: [symbol], references: [symbol], onDelete: Cascade)
+  @@unique([symbol, url])
+  @@index([symbol, publishedAt])
+}
+
+model Filing {
+  id          String   @id @default(cuid())
+  symbol      String
+  form        String   // 10-K, 10-Q, 8-K, etc.
+  title       String?
+  filedAt     DateTime?
+  accession   String?
+  url         String
+  summary     String?
+  createdAt   DateTime @default(now())
+
+  ticker      Ticker   @relation(fields: [symbol], references: [symbol], onDelete: Cascade)
+  @@unique([symbol, url])
+  @@index([symbol, filedAt])
+}
+
+model ResearchReport {
+  id              String   @id @default(cuid())
+  symbol          String
+  asOf            DateTime @default(now())
+  businessOverview String
+  revenueModel    String
+  recentNews      String
+  earningsSummary String
+  bullCase        String
+  bearCase        String
+  keyRisks        String
+  catalysts       String
+  valuation       String
+  comps           String
+  finalView       String   // "avoid" | "watch" | "high-conviction"
+  confidence      Float    // 0..1
+  sources         String   // JSON array
+  llmProvider     String
+  llmModel        String
+  raw             String?  // raw JSON returned by LLM, for audit
+  createdAt       DateTime @default(now())
+
+  ticker          Ticker   @relation(fields: [symbol], references: [symbol], onDelete: Cascade)
+  @@index([symbol, asOf])
+}
+
+model TradeIdea {
+  id                   String   @id @default(cuid())
+  symbol               String
+  direction            String   // "long" | "short"
+  thesis               String
+  entry                Float?
+  stopLoss             Float?
+  target               Float?
+  maxPositionPct       Float    // % of portfolio
+  invalidation         String
+  downsideScenarios    String
+  liquidityWarning     String?
+  reportId             String?
+  status               String   @default("open") // open | acted | dismissed | expired
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  ticker               Ticker   @relation(fields: [symbol], references: [symbol], onDelete: Cascade)
+  @@index([symbol, status])
+}
+
+model PaperAccount {
+  id            String   @id @default("default")
+  startingCash  Float
+  cash          Float
+  commissionBps Float    @default(2)
+  slippageBps   Float    @default(5)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model PaperPosition {
+  id           String   @id @default(cuid())
+  symbol       String   @unique
+  quantity     Float
+  avgPrice     Float
+  openedAt     DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  ticker       Ticker   @relation(fields: [symbol], references: [symbol], onDelete: Cascade)
+}
+
+model PaperTrade {
+  id           String   @id @default(cuid())
+  symbol       String
+  side         String   // "buy" | "sell"
+  quantity     Float
+  price        Float    // fill price including slippage
+  commission   Float
+  notes        String?
+  ideaId       String?
+  realizedPnL  Float    @default(0)
+  executedAt   DateTime @default(now())
+
+  ticker       Ticker   @relation(fields: [symbol], references: [symbol], onDelete: Cascade)
+  @@index([symbol, executedAt])
+}
+
+model AgentLog {
+  id          String   @id @default(cuid())
+  agent       String
+  symbol      String?
+  input       String   // JSON
+  output      String   // JSON
+  durationMs  Int
+  status      String   // "ok" | "error"
+  error       String?
+  sources     String?  // JSON array
+  createdAt   DateTime @default(now())
+
+  @@index([agent, createdAt])
+  @@index([symbol, createdAt])
+}
+
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
